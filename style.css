@@ -1,23 +1,20 @@
-html, body 
-{
+html,
+body {
   margin: 0;
   padding: 0;
 }
 
-canvas 
-{
+canvas {
   display: block;
 }
 
-#main_text
-{
+#main_text {
   font-size: 16px;
   font-family: 'Arial';
   color: white;
 }
 
-#input
-{
+#input {
   font-size: 14px;
   font-family: 'Arial';
   color: white;
