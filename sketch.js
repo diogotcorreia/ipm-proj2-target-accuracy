@@ -34,22 +34,17 @@ let next_background_color;
 
 // ROLLOUT_TESTS
 const __flags = {
-  __flag_only_show_border_on_duplicate_pos: false,
-  __flag_show_line_from_current_target_to_next: true,
+  __flag_only_show_border_on_duplicate_pos: true,
   __flag_dotted_line_from_current_to_next: false,
   __flag_next_filled: false,
 };
 
 function setup_flags() {
-  if (Math.random() >= 0.5) {
-    __flags.__flag_only_show_border_on_duplicate_pos = true;
-  }
-  if (Math.random() >= 0.5) {
+  if (Math.random() >= 0.66) {
+    __flags.__flag_only_show_border_on_duplicate_pos = false;
+  } else if (Math.random() >= 0.5) {
     __flags.__flag_next_filled = true;
   }
-  /*if (Math.random() >= 0.5) {
-    __flags.__flag_show_line_from_current_target_to_next = true;
-  }*/
   if (Math.random() >= 0.5) {
     __flags.__flag_dotted_line_from_current_to_next = true;
   }
@@ -256,6 +251,10 @@ function drawTarget(i) {
   // Get the location and size for target (i)
   let target = getTargetBounds(i);
 
+  // Reset stroke and fill as default colors
+  noStroke();
+  fill(color(130, 130, 130));
+
   // Check whether this target is the target the user should be trying to select
   // and also the next target to select
   if (trials[current_trial] === i) {
@@ -268,11 +267,10 @@ function drawTarget(i) {
     if (__flags.__flag_next_filled) {
       fill(color(255, 255, 255));
     }
-  } else {
-    // Fill with grey color if this is not the target the user
-    // should be trying to select
-    fill(color(130, 130, 130));
-    noStroke();
+    if (!__flags.__flag_only_show_border_on_duplicate_pos) {
+      stroke(color(255, 255, 0));
+      strokeWeight(4);
+    }
   }
 
   // Draws the target
