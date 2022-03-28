@@ -228,30 +228,25 @@ function drawTarget(i) {
   let target = getTargetBounds(i);
 
   // Check whether this target is the target the user should be trying to select
-  if (trials[current_trial] === i) {
+  // and also the next target to select
+  if(trials[current_trial] === i && trials[current_trial + 1] === i){
+	fill(color(255, 0, 0));
+	stroke(color(255, 255, 0));
+	strokeWeight(4);
+  } else if (trials[current_trial] === i) {
     // Highlights the target the user should be trying to select
     // with a white border
     fill(color(255, 0, 0));
     stroke(color(255, 255, 255));
     strokeWeight(4);
 
-    // Remember you are allowed to access targets (i-1) and (i+1)
-    // if this is the target the user should be trying to select
-    //
+  } else if (trials[current_trial+1] === i){
+	fill(color(255,255,255));
   } else {
     // Fill with grey color if this is not the target the user
     // should be trying to select
     fill(color(130, 130, 130));
-  }
-  // Check whether this target is the future target
-  const cond = __flags.__flag_only_show_border_on_duplicate_pos
-    ? trials[current_trial + 1] === trials[current_trial] && trials[current_trial + 1] === i
-    : trials[current_trial + 1] !== undefined && trials[current_trial + 1] === i;
-  if (cond) {
-    stroke(color(255, 255, 0));
-    strokeWeight(4);
-  } else {
-    noStroke();
+	noStroke();
   }
 
   // Draws the target
