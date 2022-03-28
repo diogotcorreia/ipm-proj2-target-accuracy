@@ -6,7 +6,7 @@
 // p5.js reference: https://p5js.org/reference/
 
 // Database (CHANGE THESE!)
-const GROUP_NUMBER = 0; // Add your group number here as an integer (e.g., 2, 3)
+const GROUP_NUMBER = 4; // Add your group number here as an integer (e.g., 2, 3)
 const BAKE_OFF_DAY = false; // Set to 'true' before sharing during the bake-off day
 
 // Target and grid properties (DO NOT CHANGE!)
@@ -29,6 +29,18 @@ let current_trial = 0; // the current trial number (indexes into trials array ab
 let attempt = 0; // users complete each test twice to account for practice (attemps 0 and 1)
 let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there is a miss)
 
+// Helper variables
+let next_background_color;
+
+// ROLLOUT_TESTS
+let __flag_only_show_border_on_duplicate_pos = false;
+
+function setup_flags() {
+  if (Math.random() >= 0.5) {
+    __flag_only_show_border_on_duplicate_pos = true;
+  }
+}
+
 // Target class (position and width)
 class Target {
   constructor(x, y, w) {
@@ -40,6 +52,7 @@ class Target {
 
 // Runs once at the start
 function setup() {
+  setup_flags();
   createCanvas(700, 500); // window size in px before we go into fullScreen()
   frameRate(60); // frame rate (DO NOT CHANGE!)
 
@@ -53,7 +66,7 @@ function setup() {
 function draw() {
   if (draw_targets) {
     // The user is interacting with the 6x3 target grid
-    background(color(0, 0, 0)); // sets background to black
+    background(next_background_color || color(0, 0, 0)); // sets background to black
 
     // Print trial count at the top left-corner of the canvas
     fill(color(255, 255, 255));
@@ -70,9 +83,26 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
-    fill(color(255, 255, 255));
+    // Change color of cursor if hovering a target (any target)
+    fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
+
+    // Draw line from current target to next target
+    drawGuidingArrow();
   }
+}
+
+// Get color of mouse depending if it's hovering a target or not
+function getMouseColor(x, y) {
+  // Loop over all 18 targets
+  for (let i = 0; i < 18; ++i) {
+    let target = getTargetBounds(i);
+    if (dist(target.x, target.y, x, y) < target.w / 2) {
+      return color(0, 255, 0);
+    }
+  }
+
+  return color(255, 255, 255);
 }
 
 // Print and save results at the end of 54 trials
@@ -150,8 +180,13 @@ function mousePressed() {
       let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
       let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
-      if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) hits++;
-      else misses++;
+      if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
+        hits++;
+        next_background_color = color(0, 25, 0);
+      } else {
+        misses++;
+        next_background_color = color(25, 0, 0);
+      }
 
       current_trial++; // Move on to the next trial/target
     }
@@ -185,7 +220,9 @@ function drawTarget(i) {
   if (trials[current_trial] === i) {
     // Highlights the target the user should be trying to select
     // with a white border
-    fill(color(200, 0, 0));
+    fill(color(255, 0, 0));
+    stroke(color(255, 255, 255));
+    strokeWeight(4);
 
     // Remember you are allowed to access targets (i-1) and (i+1)
     // if this is the target the user should be trying to select
@@ -193,12 +230,14 @@ function drawTarget(i) {
   } else {
     // Fill with grey color if this is not the target the user
     // should be trying to select
-    fill(color(155, 155, 155));
+    fill(color(130, 130, 130));
   }
-
   // Check whether this target is the future target
-  if (trials[current_trial + 1] && trials[current_trial + 1] === i) {
-    stroke(color(0, 200, 0));
+  const cond = __flag_only_show_border_on_duplicate_pos
+    ? trials[current_trial + 1] === trials[current_trial] && trials[current_trial + 1] === i
+    : trials[current_trial + 1] !== undefined && trials[current_trial + 1] === i;
+  if (cond) {
+    stroke(color(255, 255, 0));
     strokeWeight(4);
   } else {
     noStroke();
@@ -206,6 +245,24 @@ function drawTarget(i) {
 
   // Draws the target
   circle(target.x, target.y, target.w);
+}
+
+// Draw arrow from current target to next target
+function drawGuidingArrow() {
+  const current_target = getTargetBounds(trials[current_trial]);
+
+  if (trials[current_trial - 1] !== undefined) {
+    const prev_target = getTargetBounds(trials[current_trial - 1]);
+
+    stroke(color(200, 200, 200));
+    line(prev_target.x, prev_target.y, current_target.x, current_target.y);
+  }
+
+  /*if (trials[current_trial + 1] !== undefined) {
+    const next_target = getTargetBounds(trials[current_trial + 1]);
+    stroke(color(100, 100, 100));
+    line(current_target.x, current_target.y, next_target.x, next_target.y);
+  }*/
 }
 
 // Returns the location and size of a given target
