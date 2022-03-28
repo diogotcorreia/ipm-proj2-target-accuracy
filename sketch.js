@@ -33,11 +33,17 @@ let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there i
 let next_background_color;
 
 // ROLLOUT_TESTS
-let __flag_only_show_border_on_duplicate_pos = false;
+const __flags = {
+  __flag_only_show_border_on_duplicate_pos: false,
+  __flag_show_line_from_current_target_to_next: false,
+};
 
 function setup_flags() {
   if (Math.random() >= 0.5) {
-    __flag_only_show_border_on_duplicate_pos = true;
+    __flags.__flag_only_show_border_on_duplicate_pos = true;
+  }
+  if (Math.random() >= 0.5) {
+    __flags.__flag_show_line_from_current_target_to_next = true;
   }
 }
 
@@ -149,6 +155,7 @@ function printAndSavePerformance() {
     time_per_target: time_per_target,
     target_w_penalty: target_w_penalty,
     fitts_IDs: fitts_IDs,
+    flags: __flags,
   };
 
   // Send data to DB (DO NOT CHANGE!)
@@ -233,7 +240,7 @@ function drawTarget(i) {
     fill(color(130, 130, 130));
   }
   // Check whether this target is the future target
-  const cond = __flag_only_show_border_on_duplicate_pos
+  const cond = __flags.__flag_only_show_border_on_duplicate_pos
     ? trials[current_trial + 1] === trials[current_trial] && trials[current_trial + 1] === i
     : trials[current_trial + 1] !== undefined && trials[current_trial + 1] === i;
   if (cond) {
@@ -258,11 +265,14 @@ function drawGuidingArrow() {
     line(prev_target.x, prev_target.y, current_target.x, current_target.y);
   }
 
-  /*if (trials[current_trial + 1] !== undefined) {
+  if (
+    __flags.__flag_show_line_from_current_target_to_next &&
+    trials[current_trial + 1] !== undefined
+  ) {
     const next_target = getTargetBounds(trials[current_trial + 1]);
     stroke(color(100, 100, 100));
     line(current_target.x, current_target.y, next_target.x, next_target.y);
-  }*/
+  }
 }
 
 // Returns the location and size of a given target
