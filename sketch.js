@@ -35,7 +35,7 @@ let next_background_color;
 // ROLLOUT_TESTS
 const __flags = {
   __flag_only_show_border_on_duplicate_pos: false,
-  __flag_show_line_from_current_target_to_next: false,
+  __flag_show_line_from_current_target_to_next: true,
   __flag_dotted_line_from_current_to_next: false,
 };
 
@@ -43,11 +43,11 @@ function setup_flags() {
   if (Math.random() >= 0.5) {
     __flags.__flag_only_show_border_on_duplicate_pos = true;
   }
-  if (Math.random() >= 0.5) {
+  /*if (Math.random() >= 0.5) {
     __flags.__flag_show_line_from_current_target_to_next = true;
-    if (Math.random() >= 0.5) {
-      __flags.__flag_dotted_line_from_current_to_next = true;
-    }
+  }*/
+  if (Math.random() >= 0.5) {
+    __flags.__flag_dotted_line_from_current_to_next = true;
   }
 }
 
