@@ -36,6 +36,7 @@ let next_background_color;
 const __flags = {
   __flag_only_show_border_on_duplicate_pos: false,
   __flag_show_line_from_current_target_to_next: false,
+  __flag_dotted_line_from_current_to_next: false,
 };
 
 function setup_flags() {
@@ -44,6 +45,9 @@ function setup_flags() {
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_show_line_from_current_target_to_next = true;
+    if (Math.random() >= 0.5) {
+      __flags.__flag_dotted_line_from_current_to_next = true;
+    }
   }
 }
 
@@ -79,6 +83,9 @@ function draw() {
     textAlign(LEFT);
     text('Trial ' + (current_trial + 1) + ' of ' + trials.length, 50, 20);
 
+    // Draw line from current target to next target
+    drawGuidingArrow();
+
     // Draw all 18 targets
     for (var i = 0; i < 18; i++) drawTarget(i);
 
@@ -92,9 +99,6 @@ function draw() {
     // Change color of cursor if hovering a target (any target)
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
-
-    // Draw line from current target to next target
-    drawGuidingArrow();
   }
 }
 
@@ -270,8 +274,13 @@ function drawGuidingArrow() {
     trials[current_trial + 1] !== undefined
   ) {
     const next_target = getTargetBounds(trials[current_trial + 1]);
+
+    if (__flags.__flag_dotted_line_from_current_to_next) {
+      drawingContext.setLineDash([10, 10]);
+    }
     stroke(color(100, 100, 100));
     line(current_target.x, current_target.y, next_target.x, next_target.y);
+    drawingContext.setLineDash([]);
   }
 }
 
@@ -299,6 +308,7 @@ function continueTest() {
   continue_button.remove();
 
   // Shows the targets again
+  next_background_color = color(0, 0, 0);
   draw_targets = true;
   testStartTime = millis();
 }
