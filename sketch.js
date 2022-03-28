@@ -42,7 +42,7 @@ const __flags = {
 
 function setup_flags() {
   if (Math.random() >= 0.5) {
-    __flags.__only_show_border_on_duplicate_pos = true;
+    __flags.__flag_only_show_border_on_duplicate_pos = true;
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_next_filled = true;
