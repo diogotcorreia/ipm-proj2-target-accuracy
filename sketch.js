@@ -145,6 +145,23 @@ function printAndSavePerformance() {
 
   // Print Fitts IDS (one per target, -1 if failed selection)
   //
+  text('Fitts Index of Performance', width / 2, 260);
+
+  for (let i = 0; i < trials.length; ++i) {
+    let x_pos = i / trials.length < 0.5 ? (2 * width) / 6 : (4 * width) / 6;
+
+    let indexOfPerformance = fitts_IDs[i];
+    let value;
+    if (i === 0) {
+      value = '---';
+    } else if (indexOfPerformance < 0) {
+      value = 'MISSED';
+    } else {
+      value = indexOfPerformance.toFixed(3);
+    }
+
+    text(`Target ${i + 1}: ${value}`, x_pos, 280 + 20 * (i % (trials.length / 2)));
+  }
 
   // Saves results (DO NOT CHANGE!)
   let attempt_data = {
@@ -194,9 +211,17 @@ function mousePressed() {
       if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
         hits++;
         next_background_color = color(0, 25, 0);
+        if (current_trial === 0) {
+          fitts_IDs.push(0);
+        } else {
+          fitts_IDs.push(
+            calculateFittsIndexOfPerformance(trials[current_trial - 1], trials[current_trial])
+          );
+        }
       } else {
         misses++;
         next_background_color = color(25, 0, 0);
+        fitts_IDs.push(-1);
       }
 
       current_trial++; // Move on to the next trial/target
@@ -291,6 +316,18 @@ function getTargetBounds(i) {
     parseInt(TOP_PADDING) + parseInt(Math.floor(i / 3) * (TARGET_SIZE + TARGET_PADDING) + MARGIN);
 
   return new Target(x, y, TARGET_SIZE);
+}
+
+function calculateFittsIndexOfPerformance(target1, target2) {
+  const target1_bounds = getTargetBounds(target1);
+  const target2_bounds = getTargetBounds(target2);
+
+  const distance = Math.sqrt(
+    Math.pow(target1_bounds.x - target2_bounds.x, 2) +
+      Math.pow(target1_bounds.y - target2_bounds.y, 2)
+  );
+
+  return Math.log(distance / target2_bounds.w + 1) / Math.log(2);
 }
 
 // Evoked after the user starts its second (and last) attempt
