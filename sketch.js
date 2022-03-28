@@ -42,7 +42,7 @@ const __flags = {
 
 function setup_flags() {
   if (Math.random() >= 0.5) {
-	__flags.__only_show_border_on_duplicate_pos = true;
+    __flags.__only_show_border_on_duplicate_pos = true;
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_next_filled = true;
@@ -258,21 +258,21 @@ function drawTarget(i) {
 
   // Check whether this target is the target the user should be trying to select
   // and also the next target to select
-  if(trials[current_trial] === i){
-	fill(color(255, 0, 0));
-	if(trials[current_trial+1] === i){
-	  stroke(color(255, 255, 0));
-	  strokeWeight(4);
-	}
-  } else if (trials[current_trial+1] === i){
-	if(__flags.__flag_next_filled){
-	  fill(color(255,255,255));
-	}
+  if (trials[current_trial] === i) {
+    fill(color(255, 0, 0));
+    if (trials[current_trial + 1] === i) {
+      stroke(color(255, 255, 0));
+      strokeWeight(4);
+    }
+  } else if (trials[current_trial + 1] === i) {
+    if (__flags.__flag_next_filled) {
+      fill(color(255, 255, 255));
+    }
   } else {
     // Fill with grey color if this is not the target the user
     // should be trying to select
     fill(color(130, 130, 130));
-	noStroke();
+    noStroke();
   }
 
   // Draws the target
