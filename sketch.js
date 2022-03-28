@@ -35,6 +35,7 @@ let next_background_color;
 // ROLLOUT_TESTS
 const __flags = {
   __flag_only_show_border_on_duplicate_pos: true,
+  __flag_show_line_from_current_target_to_next: true,
   __flag_dotted_line_from_current_to_next: false,
   __flag_next_filled: false,
 };
