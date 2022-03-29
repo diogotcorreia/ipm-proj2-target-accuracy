@@ -34,18 +34,18 @@ let next_background_color;
 
 // ROLLOUT_TESTS
 const __flags = {
-  __flag_only_show_border_on_duplicate_pos: false,
+  __flag_only_show_border_on_duplicate_pos: true,
   __flag_show_line_from_current_target_to_next: true,
   __flag_dotted_line_from_current_to_next: false,
+  __flag_next_filled: false,
 };
 
 function setup_flags() {
-  if (Math.random() >= 0.5) {
-    __flags.__flag_only_show_border_on_duplicate_pos = true;
+  if (Math.random() >= 0.66) {
+    __flags.__flag_only_show_border_on_duplicate_pos = false;
+  } else if (Math.random() >= 0.5) {
+    __flags.__flag_next_filled = true;
   }
-  /*if (Math.random() >= 0.5) {
-    __flags.__flag_show_line_from_current_target_to_next = true;
-  }*/
   if (Math.random() >= 0.5) {
     __flags.__flag_dotted_line_from_current_to_next = true;
   }
@@ -252,31 +252,26 @@ function drawTarget(i) {
   // Get the location and size for target (i)
   let target = getTargetBounds(i);
 
-  // Check whether this target is the target the user should be trying to select
-  if (trials[current_trial] === i) {
-    // Highlights the target the user should be trying to select
-    // with a white border
-    fill(color(255, 0, 0));
-    stroke(color(255, 255, 255));
-    strokeWeight(4);
+  // Reset stroke and fill as default colors
+  noStroke();
+  fill(color(130, 130, 130));
 
-    // Remember you are allowed to access targets (i-1) and (i+1)
-    // if this is the target the user should be trying to select
-    //
-  } else {
-    // Fill with grey color if this is not the target the user
-    // should be trying to select
-    fill(color(130, 130, 130));
-  }
-  // Check whether this target is the future target
-  const cond = __flags.__flag_only_show_border_on_duplicate_pos
-    ? trials[current_trial + 1] === trials[current_trial] && trials[current_trial + 1] === i
-    : trials[current_trial + 1] !== undefined && trials[current_trial + 1] === i;
-  if (cond) {
-    stroke(color(255, 255, 0));
-    strokeWeight(4);
-  } else {
-    noStroke();
+  // Check whether this target is the target the user should be trying to select
+  // and also the next target to select
+  if (trials[current_trial] === i) {
+    fill(color(255, 0, 0));
+    if (trials[current_trial + 1] === i) {
+      stroke(color(255, 255, 0));
+      strokeWeight(4);
+    }
+  } else if (trials[current_trial + 1] === i) {
+    if (__flags.__flag_next_filled) {
+      fill(color(255, 255, 255));
+    }
+    if (!__flags.__flag_only_show_border_on_duplicate_pos) {
+      stroke(color(255, 255, 0));
+      strokeWeight(4);
+    }
   }
 
   // Draws the target
@@ -294,10 +289,7 @@ function drawGuidingArrow() {
     line(prev_target.x, prev_target.y, current_target.x, current_target.y);
   }
 
-  if (
-    __flags.__flag_show_line_from_current_target_to_next &&
-    trials[current_trial + 1] !== undefined
-  ) {
+  if (trials[current_trial + 1] !== undefined) {
     const next_target = getTargetBounds(trials[current_trial + 1]);
 
     if (__flags.__flag_dotted_line_from_current_to_next) {
