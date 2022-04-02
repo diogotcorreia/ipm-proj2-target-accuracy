@@ -38,6 +38,7 @@ const __flags = {
   __flag_show_line_from_current_target_to_next: true,
   __flag_dotted_line_from_current_to_next: false,
   __flag_next_filled: false,
+  __flag_draw_border_on_hovering: false,
 };
 
 function setup_flags() {
@@ -48,6 +49,9 @@ function setup_flags() {
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_dotted_line_from_current_to_next = true;
+  }
+  if (Math.random() >= 0.5) {
+	__flags.__flag_draw_border_on_hovering = true;
   }
 }
 
@@ -96,9 +100,26 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
+	if(__flags.__flag_draw_border_on_hovering){
+	  drawHoveringOverTarget(x, y);
+	}
+
     // Change color of cursor if hovering a target (any target)
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
+  }
+}
+
+function drawHoveringOverTarget(x, y) {
+  // Get the location and size for target (i)
+  let target = getTargetBounds(trials[current_trial]);
+
+  if (dist(target.x, target.y, x, y) < target.w / 2) {
+	stroke(color(255, 255, 255));
+	strokeWeight(4);
+
+	circle(target.x, target.y, target.w);
+	noStroke();
   }
 }
 
