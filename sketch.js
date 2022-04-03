@@ -40,6 +40,7 @@ const __flags = {
   __flag_dotted_line_from_current_to_next: false /* always off */,
   __flag_next_filled: false,
   __flag_draw_border_on_hovering: false,
+  __flag_triple_target_border: false,
 };
 
 function setup_flags() {
@@ -50,6 +51,9 @@ function setup_flags() {
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_draw_border_on_hovering = true;
+  }
+  if (Math.random() >= 0.5) {
+    __flags.__flag_triple_target_border = true;
   }
 }
 
@@ -111,6 +115,15 @@ function draw() {
 }
 
 function drawHoveringOverTarget(x, y) {
+  // Don't draw anything if it's a triple target, or we cannot see the blue stroke
+  if (
+    __flags.__flag_triple_target_border &&
+    trials[current_trial - 1] === trials[current_trial] &&
+    trials[current_trial] === trials[current_trial + 1]
+  ) {
+    return;
+  }
+
   // Get the location and size for target (i)
   let target = getTargetBounds(trials[current_trial]);
 
@@ -288,7 +301,13 @@ function drawTarget(i) {
   if (trials[current_trial] === i) {
     fill(color(255, 0, 0));
     if (trials[current_trial + 1] === i) {
-      stroke(color(255, 255, 0));
+      if (__flags.__flag_triple_target_border && trials[current_trial - 1] === i) {
+        // If next and previous, stroke is blue (3 times the same target)
+        stroke(color(0, 0, 255));
+      } else {
+        // If only next, stroke is yellow (2 times the same target)
+        stroke(color(255, 255, 0));
+      }
       strokeWeight(4);
     }
   } else if (trials[current_trial + 1] === i) {
