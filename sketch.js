@@ -81,6 +81,7 @@ function draw() {
     background(next_background_color || color(0, 0, 0)); // sets background to black
 
     // Print trial count at the top left-corner of the canvas
+    noStroke();
     fill(color(255, 255, 255));
     textAlign(LEFT);
     text('Trial ' + (current_trial + 1) + ' of ' + trials.length, 50, 20);
@@ -103,6 +104,7 @@ function draw() {
     }
 
     // Change color of cursor if hovering a target (any target)
+    noStroke();
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
   }
@@ -117,7 +119,6 @@ function drawHoveringOverTarget(x, y) {
     strokeWeight(4);
 
     circle(target.x, target.y, target.w);
-    noStroke();
   }
 }
 
