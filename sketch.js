@@ -35,8 +35,8 @@ let next_background_color;
 // ROLLOUT_TESTS
 const __flags = {
   __flag_only_show_border_on_duplicate_pos: true,
-  __flag_show_line_from_current_target_to_next: true,
-  __flag_dotted_line_from_current_to_next: false,
+  __flag_show_line_from_current_target_to_next: true /* always on */,
+  __flag_dotted_line_from_current_to_next: false /* always off */,
   __flag_next_filled: false,
   __flag_draw_border_on_hovering: false,
 };
@@ -48,10 +48,7 @@ function setup_flags() {
     __flags.__flag_next_filled = true;
   }
   if (Math.random() >= 0.5) {
-    __flags.__flag_dotted_line_from_current_to_next = true;
-  }
-  if (Math.random() >= 0.5) {
-	__flags.__flag_draw_border_on_hovering = true;
+    __flags.__flag_draw_border_on_hovering = true;
   }
 }
 
@@ -100,9 +97,9 @@ function draw() {
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
-	if(__flags.__flag_draw_border_on_hovering){
-	  drawHoveringOverTarget(x, y);
-	}
+    if (__flags.__flag_draw_border_on_hovering) {
+      drawHoveringOverTarget(x, y);
+    }
 
     // Change color of cursor if hovering a target (any target)
     fill(getMouseColor(x, y));
@@ -115,11 +112,11 @@ function drawHoveringOverTarget(x, y) {
   let target = getTargetBounds(trials[current_trial]);
 
   if (dist(target.x, target.y, x, y) < target.w / 2) {
-	stroke(color(255, 255, 255));
-	strokeWeight(4);
+    stroke(color(255, 255, 255));
+    strokeWeight(4);
 
-	circle(target.x, target.y, target.w);
-	noStroke();
+    circle(target.x, target.y, target.w);
+    noStroke();
   }
 }
 
@@ -303,22 +300,20 @@ function drawTarget(i) {
 function drawGuidingArrow() {
   const current_target = getTargetBounds(trials[current_trial]);
 
+  // Draw first line from current to next, so it gets drawn below
+  // the line from prev to current if they overlap
+  if (trials[current_trial + 1] !== undefined) {
+    const next_target = getTargetBounds(trials[current_trial + 1]);
+
+    stroke(color(100, 100, 100));
+    line(current_target.x, current_target.y, next_target.x, next_target.y);
+  }
+
   if (trials[current_trial - 1] !== undefined) {
     const prev_target = getTargetBounds(trials[current_trial - 1]);
 
     stroke(color(200, 200, 200));
     line(prev_target.x, prev_target.y, current_target.x, current_target.y);
-  }
-
-  if (trials[current_trial + 1] !== undefined) {
-    const next_target = getTargetBounds(trials[current_trial + 1]);
-
-    if (__flags.__flag_dotted_line_from_current_to_next) {
-      drawingContext.setLineDash([10, 10]);
-    }
-    stroke(color(100, 100, 100));
-    line(current_target.x, current_target.y, next_target.x, next_target.y);
-    drawingContext.setLineDash([]);
   }
 }
 
