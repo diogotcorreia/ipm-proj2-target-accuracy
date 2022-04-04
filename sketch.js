@@ -16,6 +16,9 @@ let TARGET_PADDING, MARGIN, LEFT_PADDING, TOP_PADDING;
 let continue_button;
 let inputArea = { x: 0, y: 0, h: 0, w: 0 }; // Position and size of the user input area
 
+// How much time the time bar represents
+let TIME_BAR_MILLIS = 563;
+
 // Metrics
 let testStartTime, testEndTime; // time between the start and end of one attempt (54 trials)
 let testFirstTargetTime;
@@ -32,6 +35,7 @@ let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there i
 
 // Helper variables
 let next_background_color;
+let last_target_click;
 
 // ROLLOUT_TESTS
 const __flags = {
@@ -41,6 +45,7 @@ const __flags = {
   __flag_next_filled: false,
   __flag_draw_border_on_hovering: false,
   __flag_triple_target_border: false,
+  __flag_time_bar: false,
 };
 
 function setup_flags() {
@@ -54,6 +59,9 @@ function setup_flags() {
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_triple_target_border = true;
+  }
+  if (Math.random() >= 0.5) {
+    __flags.__flag_time_bar = true;
   }
 }
 
@@ -111,6 +119,11 @@ function draw() {
     noStroke();
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
+
+    if (__flags.__flag_time_bar) {
+      // Draw time bar on the side
+      drawTimeBar();
+    }
   }
 }
 
@@ -264,6 +277,8 @@ function mousePressed() {
         fitts_IDs.push(-1);
       }
 
+      last_target_click = millis();
+
       current_trial++; // Move on to the next trial/target
     }
 
@@ -364,6 +379,28 @@ function calculateFittsIndexOfPerformance(target1, target2) {
   );
 
   return Math.log(distance / target2_bounds.w + 1) / Math.log(2);
+}
+
+function drawTimeBar() {
+  if (!last_target_click) return;
+
+  // 40% of screen height
+  const barHeight = 0.4 * height;
+
+  const timeSinceLast = millis() - last_target_click;
+  const percentage = 1 - Math.min(1, timeSinceLast / TIME_BAR_MILLIS);
+  const innerBarHeight = barHeight * percentage;
+
+  stroke(color(176, 46, 12));
+  strokeWeight(2);
+  noFill();
+
+  rect(30, height / 2 - barHeight / 2, 30, barHeight, 10);
+
+  noStroke();
+  fill(color(235, 69, 17));
+
+  rect(30, height / 2 - barHeight / 2, 30, innerBarHeight, 10);
 }
 
 // Evoked after the user starts its second (and last) attempt
