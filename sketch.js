@@ -329,7 +329,11 @@ function drawTarget(i) {
     }
   } else if (trials[current_trial + 1] === i) {
     if (__flags.__flag_next_filled) {
-      fill(color(255, 255, 255));
+      if (current_trial === 0) {
+        fill(color(200, 200, 200));
+      } else {
+        fill(color(255, 255, 255));
+      }
     }
     if (!__flags.__flag_only_show_border_on_duplicate_pos) {
       stroke(color(255, 255, 0));
