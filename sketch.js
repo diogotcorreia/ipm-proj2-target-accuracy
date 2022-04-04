@@ -124,6 +124,8 @@ function draw() {
       // Draw time bar on the side
       drawTimeBar();
     }
+
+    drawInstructions();
   }
 }
 
@@ -401,6 +403,50 @@ function drawTimeBar() {
   fill(color(235, 69, 17));
 
   rect(30, height / 2 - barHeight / 2, 30, innerBarHeight, 10);
+}
+
+function drawInstructions() {
+  // Draw instructions above input area
+  let startY = inputArea.y - TARGET_SIZE * 1.5;
+
+  fill(color(255, 0, 0));
+  noStroke();
+  circle(inputArea.x + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+  fill(color(255, 255, 255));
+  text('Target', inputArea.x + TARGET_SIZE * 1.7, startY);
+  if (__flags.__flag_next_filled) {
+    fill(color(255, 255, 255));
+    noStroke();
+    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+    text('Next target', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
+  } else if (!__flags.__flag_only_show_border_on_duplicate_pos) {
+    fill(color(130, 130, 130));
+    stroke(color(255, 255, 0));
+    strokeWeight(4);
+    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+    fill(color(255, 255, 255));
+    noStroke();
+    text('Next target', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
+  }
+  startY -= TARGET_SIZE * 1.5;
+
+  fill(color(255, 0, 0));
+  stroke(color(255, 255, 0));
+  strokeWeight(4);
+  circle(inputArea.x + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+  fill(color(255, 255, 255));
+  noStroke();
+  text('Click twice', inputArea.x + TARGET_SIZE * 1.7, startY);
+  if (__flags.__flag_triple_target_border) {
+    fill(color(255, 0, 0));
+    stroke(color(0, 0, 255));
+    strokeWeight(4);
+    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+    fill(color(255, 255, 255));
+    noStroke();
+    text('Click three times', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
+  }
+  startY -= TARGET_SIZE * 1.5;
 }
 
 // Evoked after the user starts its second (and last) attempt
