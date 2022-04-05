@@ -383,12 +383,10 @@ function calculateFittsIndexOfPerformance(target1, target2) {
 }
 
 function drawTimeBar() {
-  if (!last_target_click) return;
-
   // 40% of screen height
   const barHeight = 0.4 * height;
 
-  const timeSinceLast = millis() - last_target_click;
+  const timeSinceLast = last_target_click ? millis() - last_target_click : 0;
   const percentage = 1 - Math.min(1, timeSinceLast / TIME_BAR_MILLIS);
   const innerBarHeight = barHeight * percentage;
 
