@@ -21,7 +21,6 @@ let TIME_BAR_MILLIS = 563;
 
 // Metrics
 let testStartTime, testEndTime; // time between the start and end of one attempt (54 trials)
-let testFirstTargetTime;
 let hits = 0; // number of successful selections
 let misses = 0; // number of missed selections (used to calculate accuracy)
 let database; // Firebase DB
@@ -168,7 +167,6 @@ function printAndSavePerformance() {
   // DO NOT CHANGE THESE!
   let accuracy = parseFloat(hits * 100) / parseFloat(hits + misses);
   let test_time = (testEndTime - testStartTime) / 1000;
-  let test_time_to_first_target = (testFirstTargetTime - testStartTime) / 1000;
   let time_per_target = nf(test_time / parseFloat(hits + misses), 0, 3);
   let penalty = constrain(
     (parseFloat(95) - parseFloat(hits * 100) / parseFloat(hits + misses)) * 0.2,
@@ -226,7 +224,6 @@ function printAndSavePerformance() {
     target_w_penalty: target_w_penalty,
     fitts_IDs: fitts_IDs,
     flags: __flags,
-    test_time_to_first_target,
   };
 
   // Send data to DB (DO NOT CHANGE!)
@@ -255,11 +252,6 @@ function mousePressed() {
     // increasing either the 'hits' or 'misses' counters
 
     if (insideInputArea(mouseX, mouseY)) {
-      if (current_trial === 0) {
-        // Save when first target was clicked
-        testFirstTargetTime = millis();
-      }
-
       let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
       let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
@@ -300,6 +292,9 @@ function mousePressed() {
           height / 2 - continue_button.size().height / 2
         );
       }
+    } else if (current_trial === 1) {
+      // Check if this was the first selection in an attempt
+      testStartTime = millis();
     }
   }
 }
