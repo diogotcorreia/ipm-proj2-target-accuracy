@@ -101,7 +101,10 @@ function draw() {
     drawGuidingArrow();
 
     // Draw all 18 targets
-    for (var i = 0; i < 18; i++) drawTarget(i);
+    for (var i = 0; i < 18; i++) {
+      drawTarget(i);
+      drawTargetArea(i);
+    }
 
     // Draw the user input area
     drawInputArea();
@@ -109,6 +112,10 @@ function draw() {
     // Draw the virtual cursor
     let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
     let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+    let snap_target = getSnapTarget(x, y);
+    snap_target = getTargetBounds(snap_target);
+    let snap_x = snap_target.x;
+    let snap_y = snap_target.y;
 
     if (__flags.__flag_draw_border_on_hovering) {
       drawHoveringOverTarget(x, y);
@@ -116,8 +123,10 @@ function draw() {
 
     // Change color of cursor if hovering a target (any target)
     noStroke();
-    fill(getMouseColor(x, y));
+    //fill(getMouseColor(x, y));
+    fill(255,255,255);
     circle(x, y, 0.5 * PPCM);
+    circle(snap_x, snap_y, 0.5 *PPCM)
 
     if (__flags.__flag_time_bar) {
       // Draw time bar on the side
@@ -160,6 +169,31 @@ function getMouseColor(x, y) {
   }
 
   return color(255, 255, 255);
+}
+
+function getSnapTarget(x, y) {
+  // Loop over all 18 targets
+  for (let i = 0; i < 18; ++i) {
+    let target = getTargetBounds(i);
+    let square_coords = [[target.x-1.5*PPCM, target.y-1.5*PPCM + target.w*2], [target.x-1.5*PPCM, target.y-1.5*PPCM], [target.x-1.5*PPCM + target.w*2, target.y-1.5*PPCM], [target.x-1.5*PPCM + target.w*2, target.y-1.5*PPCM + target.w*2]];
+    if (inside(x, y, square_coords)) {
+      return i;
+    }
+  }
+}
+
+function inside(x, y, square) {
+    
+    let inside = false;
+    for (let i = 0, j = 3; i < 4; j = i++) {
+        let xi = square[i][0], yi = square[i][1];
+        let xj = square[j][0], yj = square[j][1];
+        
+        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    
+    return inside;
 }
 
 // Print and save results at the end of 54 trials
@@ -254,8 +288,9 @@ function mousePressed() {
     if (insideInputArea(mouseX, mouseY)) {
       let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
       let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+      let square_coords = [[target.x-1.5*PPCM, target.y-1.5*PPCM + target.w*2], [target.x-1.5*PPCM, target.y-1.5*PPCM], [target.x-1.5*PPCM + target.w*2, target.y-1.5*PPCM], [target.x-1.5*PPCM + target.w*2, target.y-1.5*PPCM + target.w*2]];
 
-      if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
+      if (inside(virtual_x, virtual_y, square_coords)) {
         hits++;
         next_background_color = color(0, 25, 0);
         if (current_trial === 0) {
@@ -297,6 +332,13 @@ function mousePressed() {
       testStartTime = millis();
     }
   }
+}
+
+function drawTargetArea(i) {
+  let target = getTargetBounds(i);
+  stroke(255,255,255);
+  noFill();
+  square(target.x-1.5*PPCM, target.y-1.5*PPCM, target.w*2);
 }
 
 // Draw target on-screen
