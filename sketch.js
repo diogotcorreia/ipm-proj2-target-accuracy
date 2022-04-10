@@ -135,11 +135,13 @@ function draw() {
 
     if (__flags.__flag_snapping) {
       // If snapping is enabled, add a new cursor over the currently selected target
-      const { x: snapX, y: snapY } = getSnapTarget(x, y);
+      const snapTarget = getSnapTarget(x, y);
 
-      noStroke();
-      fill(255, 255, 255);
-      circle(snapX, snapY, 0.5 * PPCM);
+      if (snapTarget) {
+        noStroke();
+        fill(255, 255, 255);
+        circle(snapTarget.x, snapTarget.y, 0.5 * PPCM);
+      }
     }
 
     // Change color of cursor if hovering a target (any target)
