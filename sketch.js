@@ -45,6 +45,7 @@ const __flags = {
   __flag_draw_border_on_hovering: false,
   __flag_triple_target_border: false,
   __flag_time_bar: false,
+  __flag_snapping: false,
 };
 
 function setup_flags() {
@@ -61,6 +62,9 @@ function setup_flags() {
   }
   if (Math.random() >= 0.5) {
     __flags.__flag_time_bar = true;
+  }
+  if (Math.random() >= 0.5) {
+    __flags.__flag_snapping = true;
   }
 }
 
@@ -97,27 +101,30 @@ function draw() {
     textAlign(LEFT);
     text('Trial ' + (current_trial + 1) + ' of ' + trials.length, 50, 20);
 
+    if (__flags.__flag_snapping) {
+      // Draw snapping area of all 18 targets
+      for (let i = 0; i < 18; i++) {
+        drawTargetArea(i);
+      }
+    }
+
     // Draw line from current target to next target
     drawGuidingArrow();
 
     // Draw all 18 targets
-    for (var i = 0; i < 18; i++) drawTarget(i);
+    for (let i = 0; i < 18; i++) {
+      drawTarget(i);
+    }
 
     // Draw the user input area
     drawInputArea();
 
     // Draw the virtual cursor
-    let x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
-    let y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+    const [x, y] = getVirtualMouseCoords();
 
     if (__flags.__flag_draw_border_on_hovering) {
       drawHoveringOverTarget(x, y);
     }
-
-    // Change color of cursor if hovering a target (any target)
-    noStroke();
-    fill(getMouseColor(x, y));
-    circle(x, y, 0.5 * PPCM);
 
     if (__flags.__flag_time_bar) {
       // Draw time bar on the side
@@ -125,6 +132,20 @@ function draw() {
     }
 
     drawInstructions();
+
+    if (__flags.__flag_snapping) {
+      // If snapping is enabled, add a new cursor over the currently selected target
+      const { x: snapX, y: snapY } = getSnapTarget(x, y);
+
+      noStroke();
+      fill(255, 255, 255);
+      circle(snapX, snapY, 0.5 * PPCM);
+    }
+
+    // Change color of cursor if hovering a target (any target)
+    noStroke();
+    fill(getMouseColor(x, y));
+    circle(x, y, 0.5 * PPCM);
   }
 }
 
@@ -141,7 +162,7 @@ function drawHoveringOverTarget(x, y) {
   // Get the location and size for target (i)
   let target = getTargetBounds(trials[current_trial]);
 
-  if (dist(target.x, target.y, x, y) < target.w / 2) {
+  if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) {
     stroke(color(255, 255, 255));
     strokeWeight(4);
 
@@ -154,12 +175,27 @@ function getMouseColor(x, y) {
   // Loop over all 18 targets
   for (let i = 0; i < 18; ++i) {
     let target = getTargetBounds(i);
-    if (dist(target.x, target.y, x, y) < target.w / 2) {
+    if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) {
       return color(0, 255, 0);
     }
   }
 
   return color(255, 255, 255);
+}
+
+function getSnapTarget(x, y) {
+  // Loop over all 18 targets
+  for (let i = 0; i < 18; ++i) {
+    let target = getTargetBounds(i);
+    if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) return target;
+  }
+}
+
+// Returns true if coords are inside given square
+function inside(x, y, square) {
+  const [top, right, bottom, left] = square;
+
+  return y >= top && y <= bottom && x >= left && x <= right;
 }
 
 // Print and save results at the end of 54 trials
@@ -252,10 +288,9 @@ function mousePressed() {
     // increasing either the 'hits' or 'misses' counters
 
     if (insideInputArea(mouseX, mouseY)) {
-      let virtual_x = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
-      let virtual_y = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+      const [virtualX, virtualY] = getVirtualMouseCoords();
 
-      if (dist(target.x, target.y, virtual_x, virtual_y) < target.w / 2) {
+      if (isMouseInsideTarget({ virtualX, virtualY }, target)) {
         hits++;
         next_background_color = color(0, 25, 0);
         if (current_trial === 0) {
@@ -297,6 +332,14 @@ function mousePressed() {
       testStartTime = millis();
     }
   }
+}
+
+// Draw snapping area around target
+function drawTargetArea(i) {
+  let target = getTargetBounds(i);
+  stroke(50, 50, 50);
+  noFill();
+  square(target.x - 1.5 * PPCM, target.y - 1.5 * PPCM, target.w * 2);
 }
 
 // Draw target on-screen
@@ -368,6 +411,31 @@ function getTargetBounds(i) {
     parseInt(TOP_PADDING) + parseInt(Math.floor(i / 3) * (TARGET_SIZE + TARGET_PADDING) + MARGIN);
 
   return new Target(x, y, TARGET_SIZE);
+}
+
+// Returns an array with size 2, x and y, with the virtual position of the mouse
+function getVirtualMouseCoords() {
+  let virtualX = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
+  let virtualY = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
+
+  return [virtualX, virtualY];
+}
+
+// Returns true if the mouse is over the given target
+function isMouseInsideTarget({ virtualX, virtualY }, target) {
+  if (__flags.__flag_snapping) {
+    // If snapping enable, use hitbox of snapping area
+    const square = [
+      target.y - target.w, // top
+      target.x + target.w, // right
+      target.y + target.w, // bottom
+      target.x - target.w, // left
+    ];
+
+    return inside(virtualX, virtualY, square);
+  }
+
+  return dist(target.x, target.y, virtualX, virtualY) < target.w / 2;
 }
 
 function calculateFittsIndexOfPerformance(target1, target2) {
