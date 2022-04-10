@@ -30,7 +30,7 @@ let draw_targets = false; // used to control what to show in draw()
 let trials = []; // contains the order of targets that activate in the test
 let current_trial = 0; // the current trial number (indexes into trials array above)
 let attempt = 0; // users complete each test twice to account for practice (attemps 0 and 1)
-let fitts_IDs = []; // add the Fitts ID for each selection here (-1 when there is a miss)
+let fitts_IDs = [0]; // add the Fitts ID for each selection here (-1 when there is a miss)
 
 // Helper variables
 let next_background_color;
@@ -295,11 +295,10 @@ function mousePressed() {
       if (isMouseInsideTarget({ virtualX, virtualY }, target)) {
         hits++;
         next_background_color = color(0, 25, 0);
-        if (current_trial === 0) {
-          fitts_IDs.push(0);
-        } else {
+        if (current_trial < trials.length - 1) {
+          // If not last trial, calculate fitts ID for next target
           fitts_IDs.push(
-            calculateFittsIndexOfPerformance(trials[current_trial - 1], trials[current_trial])
+            calculateFittsIndexOfPerformance({ virtualX, virtualY }, trials[current_trial + 1])
           );
         }
       } else {
@@ -440,16 +439,12 @@ function isMouseInsideTarget({ virtualX, virtualY }, target) {
   return dist(target.x, target.y, virtualX, virtualY) < target.w / 2;
 }
 
-function calculateFittsIndexOfPerformance(target1, target2) {
-  const target1_bounds = getTargetBounds(target1);
-  const target2_bounds = getTargetBounds(target2);
+function calculateFittsIndexOfPerformance({ virtualX, virtualY }, nextTarget) {
+  const targetBounds = getTargetBounds(nextTarget);
 
-  const distance = Math.sqrt(
-    Math.pow(target1_bounds.x - target2_bounds.x, 2) +
-      Math.pow(target1_bounds.y - target2_bounds.y, 2)
-  );
+  const distance = dist(virtualX, virtualY, targetBounds.x, targetBounds.y);
 
-  return Math.log(distance / target2_bounds.w + 1) / Math.log(2);
+  return Math.log(distance / targetBounds.w + 1) / Math.log(2);
 }
 
 function drawTimeBar() {
@@ -526,7 +521,7 @@ function continueTest() {
   // Resets performance variables
   hits = 0;
   misses = 0;
-  fitts_IDs = [];
+  fitts_IDs = [0];
 
   continue_button.remove();
 
