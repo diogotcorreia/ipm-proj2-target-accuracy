@@ -38,25 +38,17 @@ let last_target_click;
 
 // ROLLOUT_TESTS
 const __flags = {
-  __flag_only_show_border_on_duplicate_pos: true,
+  __flag_only_show_border_on_duplicate_pos: true /* always on */,
   __flag_show_line_from_current_target_to_next: true /* always on */,
   __flag_dotted_line_from_current_to_next: false /* always off */,
-  __flag_next_filled: false,
-  __flag_draw_border_on_hovering: false,
+  __flag_next_filled: true /* always on */,
+  __flag_draw_border_on_hovering: true /* always on */,
   __flag_triple_target_border: false,
   __flag_time_bar: false,
   __flag_snapping: false,
 };
 
 function setup_flags() {
-  if (Math.random() >= 0.66) {
-    __flags.__flag_only_show_border_on_duplicate_pos = false;
-  } else if (Math.random() >= 0.5) {
-    __flags.__flag_next_filled = true;
-  }
-  if (Math.random() >= 0.5) {
-    __flags.__flag_draw_border_on_hovering = true;
-  }
   if (Math.random() >= 0.5) {
     __flags.__flag_triple_target_border = true;
   }
@@ -122,9 +114,7 @@ function draw() {
     // Draw the virtual cursor
     const [x, y] = getVirtualMouseCoords();
 
-    if (__flags.__flag_draw_border_on_hovering) {
-      drawHoveringOverTarget(x, y);
-    }
+    drawHoveringOverTarget(x, y);
 
     if (__flags.__flag_time_bar) {
       // Draw time bar on the side
@@ -367,16 +357,10 @@ function drawTarget(i) {
       strokeWeight(4);
     }
   } else if (trials[current_trial + 1] === i) {
-    if (__flags.__flag_next_filled) {
-      if (current_trial === 0) {
-        fill(color(200, 200, 200));
-      } else {
-        fill(color(255, 255, 255));
-      }
-    }
-    if (!__flags.__flag_only_show_border_on_duplicate_pos) {
-      stroke(color(255, 255, 0));
-      strokeWeight(4);
+    if (current_trial === 0) {
+      fill(color(200, 200, 200));
+    } else {
+      fill(color(255, 255, 255));
     }
   }
 
@@ -476,20 +460,10 @@ function drawInstructions() {
   circle(inputArea.x + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
   fill(color(255, 255, 255));
   text('Target', inputArea.x + TARGET_SIZE * 1.7, startY);
-  if (__flags.__flag_next_filled) {
-    fill(color(255, 255, 255));
-    noStroke();
-    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
-    text('Next target', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
-  } else if (!__flags.__flag_only_show_border_on_duplicate_pos) {
-    fill(color(130, 130, 130));
-    stroke(color(255, 255, 0));
-    strokeWeight(4);
-    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
-    fill(color(255, 255, 255));
-    noStroke();
-    text('Next target', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
-  }
+  fill(color(255, 255, 255));
+  noStroke();
+  circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
+  text('Next target', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
   startY -= TARGET_SIZE * 1.5;
 
   fill(color(255, 0, 0));
