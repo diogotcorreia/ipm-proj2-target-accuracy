@@ -135,7 +135,7 @@ function draw() {
 
     if (__flags.__flag_snapping) {
       // If snapping is enabled, add a new cursor over the currently selected target
-      const { x: snapX, y: snapY } = getTargetBounds(getSnapTarget(x, y));
+      const { x: snapX, y: snapY } = getSnapTarget(x, y);
 
       noStroke();
       fill(255, 255, 255);
@@ -187,7 +187,7 @@ function getSnapTarget(x, y) {
   // Loop over all 18 targets
   for (let i = 0; i < 18; ++i) {
     let target = getTargetBounds(i);
-    if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) return i;
+    if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) return target;
   }
 }
 
