@@ -46,6 +46,7 @@ const __flags = {
   __flag_triple_target_border: false,
   __flag_time_bar: false,
   __flag_snapping: false,
+  __flag_draw_targets_on_input_area: false,
 };
 
 function setup_flags() {
@@ -55,8 +56,11 @@ function setup_flags() {
   if (Math.random() >= 0.5) {
     __flags.__flag_time_bar = true;
   }
-  if (Math.random() >= 0.5) {
+  if (Math.random() >= 0.66) {
     __flags.__flag_snapping = true;
+    if (Math.random() >= 0.5) {
+      __flags.__flag_draw_targets_on_input_area = true;
+    }
   }
 }
 
@@ -155,6 +159,7 @@ function drawHoveringOverTarget(x, y) {
   if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) {
     stroke(color(255, 255, 255));
     strokeWeight(4);
+    noFill();
 
     circle(target.x, target.y, target.w);
   }
@@ -332,11 +337,8 @@ function drawTargetArea(i) {
   square(target.x - 1.5 * PPCM, target.y - 1.5 * PPCM, target.w * 2);
 }
 
-// Draw target on-screen
-function drawTarget(i) {
-  // Get the location and size for target (i)
-  let target = getTargetBounds(i);
-
+// Set stroke and fill colors for given target
+function setStylesForTarget(i) {
   // Reset stroke and fill as default colors
   noStroke();
   fill(color(130, 130, 130));
@@ -362,6 +364,14 @@ function drawTarget(i) {
       fill(color(255, 255, 255));
     }
   }
+}
+
+// Draw target on-screen
+function drawTarget(i) {
+  // Get the location and size for target (i)
+  let target = getTargetBounds(i);
+
+  setStylesForTarget(i);
 
   // Draws the target
   circle(target.x, target.y, target.w);
@@ -542,4 +552,25 @@ function drawInputArea() {
   strokeWeight(2);
 
   rect(inputArea.x, inputArea.y, inputArea.w, inputArea.h);
+
+  if (__flags.__flag_draw_targets_on_input_area) {
+    for (let i = 0; i < 18; i++) {
+      drawInputAreaTarget(i);
+    }
+  }
+}
+
+// Draw target representation inside input area
+function drawInputAreaTarget(i) {
+  const target = getTargetBounds(i);
+
+  const x = map(target.x, 0, width, inputArea.x, inputArea.x + inputArea.w);
+  const y = map(target.y, 0, height, inputArea.y, inputArea.y + inputArea.h);
+  const size = map(target.w, 0, width, 0, inputArea.w) * 0.95;
+
+  setStylesForTarget(i);
+
+  rectMode(RADIUS);
+  rect(x, y, size, size);
+  rectMode(CORNER);
 }
