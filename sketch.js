@@ -56,7 +56,7 @@ function setup_flags() {
   if (Math.random() >= 0.5) {
     __flags.__flag_time_bar = true;
   }
-  if (Math.random() >= 0.66) {
+  if (Math.random() >= 0.33) {
     __flags.__flag_snapping = true;
     if (Math.random() >= 0.5) {
       __flags.__flag_draw_targets_on_input_area = true;
