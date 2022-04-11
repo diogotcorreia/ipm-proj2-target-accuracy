@@ -123,21 +123,19 @@ function draw() {
 
     drawInstructions();
 
-    if (__flags.__flag_snapping) {
-      // If snapping is enabled, add a new cursor over the currently selected target
-      const snapTarget = getSnapTarget(x, y);
-
-      if (snapTarget) {
-        noStroke();
-        fill(255, 255, 255);
-        circle(snapTarget.x, snapTarget.y, 0.5 * PPCM);
-      }
-    }
-
     // Change color of cursor if hovering a target (any target)
     noStroke();
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
+
+    if (__flags.__flag_snapping) {
+      // If snapping is enabled, add a new cursor over that is a basic mapping from the real cursor in the input area
+      const [secondVirtualX, secondVirtualY] = getBaseVirtualMouseCoords();
+
+      noStroke();
+      fill(255, 255, 255);
+      circle(secondVirtualX, secondVirtualY, 0.5 * PPCM);
+    }
   }
 }
 
@@ -175,19 +173,20 @@ function getMouseColor(x, y) {
   return color(255, 255, 255);
 }
 
+// Returns nearest target to given coordinates
 function getSnapTarget(x, y) {
-  // Loop over all 18 targets
-  for (let i = 0; i < 18; ++i) {
-    let target = getTargetBounds(i);
-    if (isMouseInsideTarget({ virtualX: x, virtualY: y }, target)) return target;
-  }
-}
-
-// Returns true if coords are inside given square
-function inside(x, y, square) {
-  const [top, right, bottom, left] = square;
-
-  return y >= top && y <= bottom && x >= left && x <= right;
+  return [...new Array(18)]
+    .map((_, i) => getTargetBounds(i))
+    .reduce(
+      (acc, target) => {
+        const distance = dist(x, y, target.x, target.y);
+        if (distance < acc.distance) {
+          return { target, distance };
+        }
+        return acc;
+      },
+      { target: undefined, distance: Infinity }
+    ).target;
 }
 
 // Print and save results at the end of 54 trials
@@ -400,6 +399,18 @@ function getTargetBounds(i) {
 
 // Returns an array with size 2, x and y, with the virtual position of the mouse
 function getVirtualMouseCoords() {
+  const [virtualX, virtualY] = getBaseVirtualMouseCoords();
+
+  if (__flags.__flag_snapping) {
+    const target = getSnapTarget(virtualX, virtualY);
+    return [target.x, target.y];
+  }
+
+  return [virtualX, virtualY];
+}
+
+// Returns the basic mapping from the input area to the whole screen, without any additional processing
+function getBaseVirtualMouseCoords() {
   let virtualX = map(mouseX, inputArea.x, inputArea.x + inputArea.w, 0, width);
   let virtualY = map(mouseY, inputArea.y, inputArea.y + inputArea.h, 0, height);
 
@@ -408,18 +419,6 @@ function getVirtualMouseCoords() {
 
 // Returns true if the mouse is over the given target
 function isMouseInsideTarget({ virtualX, virtualY }, target) {
-  if (__flags.__flag_snapping) {
-    // If snapping enable, use hitbox of snapping area
-    const square = [
-      target.y - target.w, // top
-      target.x + target.w, // right
-      target.y + target.w, // bottom
-      target.x - target.w, // left
-    ];
-
-    return inside(virtualX, virtualY, square);
-  }
-
   return dist(target.x, target.y, virtualX, virtualY) < target.w / 2;
 }
 
