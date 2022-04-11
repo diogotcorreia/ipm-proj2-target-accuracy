@@ -280,7 +280,12 @@ function mousePressed() {
     // increasing either the 'hits' or 'misses' counters
 
     if (insideInputArea(mouseX, mouseY)) {
-      const [virtualX, virtualY] = getVirtualMouseCoords();
+      let [virtualX, virtualY] = getVirtualMouseCoords();
+      if (__flags__.__flag_snapping) {
+        const target = getSnapTarget(virtualX, virtualY);
+        virtualX = target.x;
+        virtualY = target.y;
+      }
 
       if (isMouseInsideTarget({ virtualX, virtualY }, target)) {
         hits++;
