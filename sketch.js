@@ -405,8 +405,10 @@ function calculateFittsIndexOfPerformance({ virtualX, virtualY }, nextTarget) {
 }
 
 function drawTimeBar() {
-  // 40% of screen height
-  const barHeight = 0.4 * height;
+  // attach to input area
+  const barHeight = inputArea.h;
+  const barX = inputArea.x - 60;
+  const barY = inputArea.y;
 
   const timeSinceLast = last_target_click ? millis() - last_target_click : 0;
   const percentage = 1 - Math.min(1, timeSinceLast / TIME_BAR_MILLIS);
@@ -416,12 +418,12 @@ function drawTimeBar() {
   strokeWeight(2);
   noFill();
 
-  rect(30, height / 2 - barHeight / 2, 30, barHeight, 10);
+  rect(barX, barY, 30, barHeight, 10);
 
   noStroke();
   fill(color(235, 69, 17));
 
-  rect(30, height / 2 - barHeight / 2, 30, innerBarHeight, 10);
+  rect(barX, barY, 30, innerBarHeight, 10);
 }
 
 function drawInstructions() {
