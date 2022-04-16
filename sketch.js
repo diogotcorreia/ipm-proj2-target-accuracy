@@ -86,11 +86,6 @@ function draw() {
     textAlign(LEFT);
     text('Trial ' + (current_trial + 1) + ' of ' + trials.length, 50, 20);
 
-    // Draw snapping area of all 18 targets
-    for (let i = 0; i < 18; i++) {
-      drawTargetArea(i);
-    }
-
     // Draw line from current target to next target
     drawGuidingArrow();
 
@@ -116,13 +111,6 @@ function draw() {
     noStroke();
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
-
-    // If snapping is enabled, add a new cursor over that is a basic mapping from the real cursor in the input area
-    const [secondVirtualX, secondVirtualY] = getBaseVirtualMouseCoords();
-
-    noStroke();
-    fill(255, 255, 255);
-    circle(secondVirtualX, secondVirtualY, 0.5 * PPCM);
   }
 }
 
@@ -150,22 +138,6 @@ function getMouseColor(x, y) {
   }
 
   return color(255, 255, 255);
-}
-
-// Returns nearest target to given coordinates
-function getSnapTarget(x, y) {
-  return [...new Array(18)]
-    .map((_, i) => getTargetBounds(i))
-    .reduce(
-      (acc, target) => {
-        const distance = dist(x, y, target.x, target.y);
-        if (distance < acc.distance) {
-          return { target, distance };
-        }
-        return acc;
-      },
-      { target: undefined, distance: Infinity }
-    ).target;
 }
 
 // Print and save results at the end of 54 trials
@@ -381,8 +353,7 @@ function getTargetBounds(i) {
 function getVirtualMouseCoords() {
   const [virtualX, virtualY] = getBaseVirtualMouseCoords();
 
-  const target = getSnapTarget(virtualX, virtualY);
-  return [target.x, target.y];
+  return [virtualX, virtualY];
 }
 
 // Returns the basic mapping from the input area to the whole screen, without any additional processing
@@ -407,10 +378,10 @@ function calculateFittsIndexOfPerformance({ virtualX, virtualY }, nextTarget) {
 }
 
 function drawTimeBar() {
-  // attach to input area
-  const barHeight = inputArea.h;
-  const barX = inputArea.x - 60;
-  const barY = inputArea.y;
+  // 40% of screen height
+  const barHeight = 0.4 * height;
+  const barX = 30;
+  const barY = height / 2 - barHeight / 2;
 
   const timeSinceLast = last_target_click ? millis() - last_target_click : 0;
   const percentage = 1 - Math.min(1, timeSinceLast / TIME_BAR_MILLIS);
@@ -523,23 +494,4 @@ function drawInputArea() {
   strokeWeight(2);
 
   rect(inputArea.x, inputArea.y, inputArea.w, inputArea.h);
-
-  for (let i = 0; i < 18; i++) {
-    drawInputAreaTarget(i);
-  }
-}
-
-// Draw target representation inside input area
-function drawInputAreaTarget(i) {
-  const target = getTargetBounds(i);
-
-  const x = map(target.x, 0, width, inputArea.x, inputArea.x + inputArea.w);
-  const y = map(target.y, 0, height, inputArea.y, inputArea.y + inputArea.h);
-  const size = map(target.w, 0, width, 0, inputArea.w) * 0.95;
-
-  setStylesForTarget(i);
-
-  rectMode(RADIUS);
-  rect(x, y, size, size);
-  rectMode(CORNER);
 }
