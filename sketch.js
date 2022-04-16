@@ -263,16 +263,18 @@ function mousePressed() {
       if (isMouseInsideTarget({ virtualX, virtualY }, target)) {
         hits++;
         next_background_color = color(0, 25, 0);
-        if (current_trial < trials.length - 1) {
-          // If not last trial, calculate fitts ID for next target
-          fitts_IDs.push(
-            calculateFittsIndexOfPerformance({ virtualX, virtualY }, trials[current_trial + 1])
-          );
-        }
       } else {
         misses++;
         next_background_color = color(25, 0, 0);
+        // If failed, set fitts ID to -1 of this target
+        fitts_IDs.pop();
         fitts_IDs.push(-1);
+      }
+      if (current_trial < trials.length - 1) {
+        // If not last trial, calculate fitts ID for next target
+        fitts_IDs.push(
+          calculateFittsIndexOfPerformance({ virtualX, virtualY }, trials[current_trial + 1])
+        );
       }
 
       last_target_click = millis();
