@@ -451,6 +451,18 @@ function drawInstructions() {
   noStroke();
   text('Click twice', inputArea.x + TARGET_SIZE * 1.7, startY);
   startY -= TARGET_SIZE * 1.5;
+
+  // PRO TIP
+  text(
+    'The virtual cursor is going to snap to the nearest target',
+    inputArea.x,
+    inputArea.y + inputArea.h + 30
+  );
+  text(
+    'PRO TIP: look only at the input area for better results',
+    inputArea.x,
+    inputArea.y + inputArea.h + 60
+  );
 }
 
 // Evoked after the user starts its second (and last) attempt
