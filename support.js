@@ -2,7 +2,6 @@
 
 let student_ID_form, display_size_form, start_button; // Initial input variables
 let student_ID, display_size; // User input parameters
-let feature_flags_info; // Debug information
 
 // Prints the initial UI that prompts that ask for student ID and screen size
 function drawUserIDScreen() {
@@ -41,29 +40,6 @@ function drawUserIDScreen() {
     width / 2 - start_button.size().width / 2,
     height / 2 - start_button.size().height / 2
   );
-
-  // Temporarily show which features are active
-  feature_flags_info = createDiv(`<table>
-      <tr>
-        <th>Feature</th>
-        <th>Status</th>
-      </tr>
-      ${Object.entries(__flags)
-        .map(
-          ([flag, status]) => `
-      <tr>
-        <td style="text-transform: capitalize;">${flag
-          .replace('__flag', '')
-          .replace(/_/g, ' ')}</th>
-        <td style="font-weight: bold; color: ${status ? 'green' : 'red'}">${
-            status ? 'ON' : 'OFF'
-          }</th>
-      </tr>
-      `
-        )
-        .join('')}
-    </table>`);
-  feature_flags_info.position(10, height);
 }
 
 // Verifies if the student ID is a number, and within an acceptable range
@@ -100,7 +76,6 @@ function startTest() {
     display_size_form.remove();
     display_size_label.remove();
     start_button.remove();
-    feature_flags_info.remove();
 
     // Goes fullscreen and starts test
     fullscreen(!fullscreen());
