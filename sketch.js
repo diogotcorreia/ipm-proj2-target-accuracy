@@ -43,25 +43,14 @@ const __flags = {
   __flag_dotted_line_from_current_to_next: false /* always off */,
   __flag_next_filled: true /* always on */,
   __flag_draw_border_on_hovering: true /* always on */,
-  __flag_triple_target_border: false,
-  __flag_time_bar: false,
-  __flag_snapping: false,
-  __flag_draw_targets_on_input_area: false,
+  __flag_triple_target_border: false /* always off */,
+  __flag_time_bar: true /* always on */,
+  __flag_snapping: true /* always on */,
+  __flag_draw_targets_on_input_area: true /* always on */,
 };
 
 function setup_flags() {
-  if (Math.random() >= 0.5) {
-    __flags.__flag_triple_target_border = true;
-  }
-  if (Math.random() >= 0.5) {
-    __flags.__flag_time_bar = true;
-  }
-  if (Math.random() >= 0.33) {
-    __flags.__flag_snapping = true;
-    if (Math.random() >= 0.5) {
-      __flags.__flag_draw_targets_on_input_area = true;
-    }
-  }
+  // No active A/B testing
 }
 
 // Target class (position and width)
@@ -97,11 +86,9 @@ function draw() {
     textAlign(LEFT);
     text('Trial ' + (current_trial + 1) + ' of ' + trials.length, 50, 20);
 
-    if (__flags.__flag_snapping) {
-      // Draw snapping area of all 18 targets
-      for (let i = 0; i < 18; i++) {
-        drawTargetArea(i);
-      }
+    // Draw snapping area of all 18 targets
+    for (let i = 0; i < 18; i++) {
+      drawTargetArea(i);
     }
 
     // Draw line from current target to next target
@@ -120,10 +107,8 @@ function draw() {
 
     drawHoveringOverTarget(x, y);
 
-    if (__flags.__flag_time_bar) {
-      // Draw time bar on the side
-      drawTimeBar();
-    }
+    // Draw time bar on the side
+    drawTimeBar();
 
     drawInstructions();
 
@@ -132,27 +117,16 @@ function draw() {
     fill(getMouseColor(x, y));
     circle(x, y, 0.5 * PPCM);
 
-    if (__flags.__flag_snapping) {
-      // If snapping is enabled, add a new cursor over that is a basic mapping from the real cursor in the input area
-      const [secondVirtualX, secondVirtualY] = getBaseVirtualMouseCoords();
+    // If snapping is enabled, add a new cursor over that is a basic mapping from the real cursor in the input area
+    const [secondVirtualX, secondVirtualY] = getBaseVirtualMouseCoords();
 
-      noStroke();
-      fill(255, 255, 255);
-      circle(secondVirtualX, secondVirtualY, 0.5 * PPCM);
-    }
+    noStroke();
+    fill(255, 255, 255);
+    circle(secondVirtualX, secondVirtualY, 0.5 * PPCM);
   }
 }
 
 function drawHoveringOverTarget(x, y) {
-  // Don't draw anything if it's a triple target, or we cannot see the blue stroke
-  if (
-    __flags.__flag_triple_target_border &&
-    trials[current_trial - 1] === trials[current_trial] &&
-    trials[current_trial] === trials[current_trial + 1]
-  ) {
-    return;
-  }
-
   // Get the location and size for target (i)
   let target = getTargetBounds(trials[current_trial]);
 
@@ -348,13 +322,7 @@ function setStylesForTarget(i) {
   if (trials[current_trial] === i) {
     fill(color(255, 0, 0));
     if (trials[current_trial + 1] === i) {
-      if (__flags.__flag_triple_target_border && trials[current_trial - 1] === i) {
-        // If next and previous, stroke is blue (3 times the same target)
-        stroke(color(0, 0, 255));
-      } else {
-        // If only next, stroke is yellow (2 times the same target)
-        stroke(color(255, 255, 0));
-      }
+      stroke(color(255, 255, 0));
       strokeWeight(4);
     }
   } else if (trials[current_trial + 1] === i) {
@@ -411,12 +379,8 @@ function getTargetBounds(i) {
 function getVirtualMouseCoords() {
   const [virtualX, virtualY] = getBaseVirtualMouseCoords();
 
-  if (__flags.__flag_snapping) {
-    const target = getSnapTarget(virtualX, virtualY);
-    return [target.x, target.y];
-  }
-
-  return [virtualX, virtualY];
+  const target = getSnapTarget(virtualX, virtualY);
+  return [target.x, target.y];
 }
 
 // Returns the basic mapping from the input area to the whole screen, without any additional processing
@@ -482,15 +446,6 @@ function drawInstructions() {
   fill(color(255, 255, 255));
   noStroke();
   text('Click twice', inputArea.x + TARGET_SIZE * 1.7, startY);
-  if (__flags.__flag_triple_target_border) {
-    fill(color(255, 0, 0));
-    stroke(color(0, 0, 255));
-    strokeWeight(4);
-    circle(inputArea.x + inputArea.w / 2 + TARGET_SIZE * 0.5, startY, TARGET_SIZE);
-    fill(color(255, 255, 255));
-    noStroke();
-    text('Click three times', inputArea.x + inputArea.w / 2 + TARGET_SIZE * 1.7, startY);
-  }
   startY -= TARGET_SIZE * 1.5;
 }
 
@@ -553,10 +508,8 @@ function drawInputArea() {
 
   rect(inputArea.x, inputArea.y, inputArea.w, inputArea.h);
 
-  if (__flags.__flag_draw_targets_on_input_area) {
-    for (let i = 0; i < 18; i++) {
-      drawInputAreaTarget(i);
-    }
+  for (let i = 0; i < 18; i++) {
+    drawInputAreaTarget(i);
   }
 }
 
