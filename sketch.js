@@ -229,7 +229,7 @@ function printAndSavePerformance() {
     time_per_target: time_per_target,
     target_w_penalty: target_w_penalty,
     fitts_IDs: fitts_IDs,
-    flags: __flags,
+    //flags: __flags,
   };
 
   // Send data to DB (DO NOT CHANGE!)
